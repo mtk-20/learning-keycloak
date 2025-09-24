@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 @Component
 public class JwtConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
-    @Value("${jwt.auth.converter.principal-Attribute}")
+    @Value("${jwt.auth.converter.principal-attribute}")
     private String principalAttribute;
     @Value("${jwt.auth.converter.resource-id}")
     private String resourceId;
@@ -36,6 +36,7 @@ public class JwtConverter implements Converter<Jwt, AbstractAuthenticationToken>
                 jwtConverter.convert(source).stream(),
                 extractRoles(source).stream()
         ).collect(Collectors.toList());
+
         return new JwtAuthenticationToken(
                 source, auth, getPrincipal(source)
         );
@@ -43,10 +44,10 @@ public class JwtConverter implements Converter<Jwt, AbstractAuthenticationToken>
 
     private String getPrincipal(Jwt source) {
         String name = JwtClaimNames.SUB;
-        if (principalAttribute != null) {
-            name = principalAttribute;
+        if (principalAttribute != null && source.containsClaim(principalAttribute)) {
+           return source.getClaim(principalAttribute);
         }
-        return source.getClaim(name);
+        return source.getSubject();
     }
 
     private Collection<? extends GrantedAuthority> extractRoles(Jwt source) {
@@ -61,7 +62,10 @@ public class JwtConverter implements Converter<Jwt, AbstractAuthenticationToken>
             return Collections.emptySet();
         }
         resource = (Map<String, Object>) resourceAccess.get(resourceId);
-        resourceRole = (Collection<String>) resourceAccess.get("roles");
+        resourceRole = (Collection<String>) resource.get("roles");
+        if (resourceRole == null) {
+            return Collections.emptySet();
+        }
         return resourceRole.stream().map(r -> new SimpleGrantedAuthority("ROLE_" + r)).collect(Collectors.toList());
     }
 }
