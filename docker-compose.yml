@@ -5,11 +5,11 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: 12345
-      MYSQL_DATABASE: keycloakDB       # creates the keycloak DB automatically
+      MYSQL_DATABASE: keycloakDB
     ports:
       - "3306:3306"
     volumes:
-      - mysql_data:/var/lib/mysql    # persist MySQL data
+      - mysql_data:/var/lib/mysql
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.3.4
@@ -18,10 +18,10 @@ services:
     environment:
       KC_DB: mysql
       KC_DB_URL: jdbc:mysql://mysql:3306/keycloakDB
-      KC_DB_USERNAME: root           # use your MySQL root user
+      KC_DB_USERNAME: root
       KC_DB_PASSWORD: 12345
-      KEYCLOAK_ADMIN: admin          # Keycloak admin username
-      KEYCLOAK_ADMIN_PASSWORD: admin # Keycloak admin password
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
     command:
       - start-dev
     ports:
